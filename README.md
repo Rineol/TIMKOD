@@ -1,0 +1,2 @@
+# TIMKOD
+Academic assignment

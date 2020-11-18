@@ -54,13 +54,32 @@ def generator_first(size, probabilities):
     return length/size
 
 
-def cond_probabilities(dictionary):
+def cond_probabilities(dictionary, file):
+    general_dict = {}
+    counter = 0
+    old_letter = 0
     sorted_dict = sorted(dictionary.items(), key=operator.itemgetter(1))
-    first_letter = sorted_dict.pop()[0]
-    second_letter = sorted_dict.pop()[0]
-    print(first_letter)
-    print(second_letter)
-    return
+    first_char = sorted_dict.pop()[0]
+    second_char = sorted_dict.pop()[0]
+    text = read_file(file)
+    for _, letter in enumerate(text):
+        if old_letter != "":
+            inside_dict = general_dict.get(old_letter, {})
+            letter_count = inside_dict.get(letter, 0)
+            total_count = inside_dict.get("total", 0)
+            inside_dict.update({letter: letter_count + 1})
+            inside_dict.update({"total": total_count + 1})
+            general_dict.update({old_letter: inside_dict})
+            counter += 1
+        old_letter = letter
+    print(general_dict)
+    print("For the exercise: ")
+    for ins_dict in general_dict:
+        for (key, value) in general_dict.get(ins_dict).items():
+            if key != "total":
+                if ins_dict == first_char or ins_dict == second_char:
+                    print("\t\t", str(ins_dict) + str(key), value / counter)
+    return general_dict, counter
 
 
 if __name__ == "__main__":
@@ -71,5 +90,7 @@ if __name__ == "__main__":
     #EXERCISE3: use calculated frequency for next task
     print(generator_first(10, probabilities))
     #EXERCISE4: conditional probability
-    cond_probabilities(probabilities)
+    general_dict, counter = cond_probabilities(probabilities, 'bees.txt')
+
+
 

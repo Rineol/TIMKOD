@@ -1,5 +1,6 @@
 import numpy as np
 import operator
+import random
 
 
 def generate_single_word(letters_source, probabilities):
@@ -54,6 +55,16 @@ def generator_first(size, probabilities):
     return length/size
 
 
+def update_dictionaries(dictionary, top_key, key):
+    selected = dictionary.get(top_key, {})
+    value = selected.get(key, 0)
+    total = selected.get("total", 0)
+    selected.update({key: value + 1})
+    selected.update({"total": total + 1})
+    dictionary.update({top_key: selected})
+    return dictionary
+
+
 def cond_probabilities(dictionary, file):
     general_dict = {}
     counter = 0
@@ -64,12 +75,7 @@ def cond_probabilities(dictionary, file):
     text = read_file(file)
     for _, letter in enumerate(text):
         if old_letter != "":
-            inside_dict = general_dict.get(old_letter, {})
-            letter_count = inside_dict.get(letter, 0)
-            total_count = inside_dict.get("total", 0)
-            inside_dict.update({letter: letter_count + 1})
-            inside_dict.update({"total": total_count + 1})
-            general_dict.update({old_letter: inside_dict})
+            general_dict = update_dictionaries(general_dict, old_letter, letter)
             counter += 1
         old_letter = letter
     print(general_dict)
@@ -82,6 +88,59 @@ def cond_probabilities(dictionary, file):
     return general_dict, counter
 
 
+def random_from_letters(letters, probability):
+    value = random.random()
+    prob_sum = 0.0
+    index = 0
+    for ind, val in enumerate(probability):
+        prob_sum += val
+        if prob_sum >= value:
+            index = ind
+            break
+    return letters[index]
+
+
+def markov_generate_source(filename, row):
+    content = read_file(filename)
+    dictionary = {}
+    letters = []
+    for _, letter in enumerate(content):
+        if len(letters) > row:
+            del(letters[0])
+            dictionary = update_dictionaries(dictionary, ''.join(letters), letter)
+        letters.append(letter)
+    #print(dictionary)
+    return dictionary
+
+
+def markov_generator(size, probabilities_dict, starter_word, number):
+    letters = list(starter_word)
+    alphabet = ['qwertyuiopasdfghjklzxcvbnm ']
+    result = ''
+    selection = {}
+    for i in range(len(letters) - number):
+        del(letters[0])
+    for i in range(size):
+        letters_random = list()
+        probability_random = list()
+        selection = probabilities_dict.get(''.join(letters), {})
+        total_count = selection.get("total", 1)
+        for (k, v) in selection.items():
+            if k != "total":
+                letters_random.append(k)
+                probability_random.append(v/total_count)
+        if probability_random:
+            char = random_from_letters(letters_random, probability_random)
+        else:
+            char = np.random.choice(alphabet)
+        result += char
+        letters.append(char)
+        if len(letters) > number:
+            del (letters[0])
+    print(result)
+    return result
+
+
 if __name__ == "__main__":
     #EXERCISE1: generate words and calculate average length
     print(generator_zero(10))
@@ -91,6 +150,25 @@ if __name__ == "__main__":
     print(generator_first(10, probabilities))
     #EXERCISE4: conditional probability
     general_dict, counter = cond_probabilities(probabilities, 'bees.txt')
+    #EXERCISE5:
+    files = ['norm_hamlet.txt',  'norm_wiki_sample.txt', 'norm_romeo.txt']
+    for file in files:
+        for i in range(1, 6, 2):
+            last_char = ""
+            words = 0
+            total_length = 0
+            general_dict = markov_generate_source(file, i)
+            result = markov_generator(100, general_dict, 'probability', i)
+            for char in result:
+                if char != " ":
+                    total_length += 1
+                if char == " " and last_char != " ":
+                    words += 1
+                last_char = char
+            print(f"Row = {i} ; Average length:  {total_length / words}")
+
+
+
 
 
 

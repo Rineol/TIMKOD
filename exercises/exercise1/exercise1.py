@@ -48,7 +48,7 @@ def calc_frequency(filepath):
 def generator_first(size, probabilities):
     alphabet = list('qwertyuiopasdfghjklzxcvbnm ')
     length = 0
-    print("PROB", probabilities)
+    #print("PROB", probabilities)
     for i in range(size):
         word = generate_single_word(alphabet, list(probabilities.values()))
         length += len(word)
@@ -78,8 +78,8 @@ def cond_probabilities(dictionary, file):
             general_dict = update_dictionaries(general_dict, old_letter, letter)
             counter += 1
         old_letter = letter
-    print(general_dict)
-    print("For the exercise: ")
+    #print(general_dict)
+    print("Exercise 4: ")
     for ins_dict in general_dict:
         for (key, value) in general_dict.get(ins_dict).items():
             if key != "total":
@@ -143,14 +143,16 @@ def markov_generator(size, probabilities_dict, starter_word, number):
 
 if __name__ == "__main__":
     #EXERCISE1: generate words and calculate average length
-    print(generator_zero(10))
+    print(F"Exercise 1 avg: {generator_zero(10)}")
     #EXERCISE2: read file and calculate frequency of words (read included in calc)
     probabilities = calc_frequency('norm_hamlet.txt')
+    print(f"Exercise 2 probabilities: {probabilities}")
     #EXERCISE3: use calculated frequency for next task
-    print(generator_first(10, probabilities))
+    print(f"Exercise 3 avg: {generator_first(10, probabilities)}")
     #EXERCISE4: conditional probability
     general_dict, counter = cond_probabilities(probabilities, 'bees.txt')
     #EXERCISE5:
+    print("Exercise 5: ")
     files = ['norm_hamlet.txt',  'norm_wiki_sample.txt', 'norm_romeo.txt']
     for file in files:
         for i in range(1, 6, 2):
@@ -158,7 +160,7 @@ if __name__ == "__main__":
             words = 0
             total_length = 0
             general_dict = markov_generate_source(file, i)
-            result = markov_generator(100, general_dict, 'probability', i)
+            result = markov_generator(1000, general_dict, 'probability', i)
             for char in result:
                 if char != " ":
                     total_length += 1
@@ -166,9 +168,3 @@ if __name__ == "__main__":
                     words += 1
                 last_char = char
             print(f"Row = {i} ; Average length:  {total_length / words}")
-
-
-
-
-
-
